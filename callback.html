@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AutoMech Auth Redirect</title>
+  <script type="text/javascript">
+    // Parse the URL parameters
+    function getUrlParameter(name) {
+      name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+      var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+      var results = regex.exec(location.search);
+      return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
+    // Function to handle the redirect
+    function handleRedirect() {
+      // Get the parameters from Auth0
+      var code = getUrlParameter('code');
+      var state = getUrlParameter('state');
+      var error = getUrlParameter('error');
+      var error_description = getUrlParameter('error_description');
+
+      // Build the redirect URL for the Android app
+      var redirectUrl = 'https://anvigo12.github.io/callback';
+      
+      // Append all the original parameters
+      var params = [];
+      if (code) params.push('code=' + encodeURIComponent(code));
+      if (state) params.push('state=' + encodeURIComponent(state));
+      if (error) params.push('error=' + encodeURIComponent(error));
+      if (error_description) params.push('error_description=' + encodeURIComponent(error_description));
+      
+      if (params.length > 0) {
+        redirectUrl += '?' + params.join('&');
+      }
+
+      // Redirect to the Android app (this will be intercepted by the app)
+      window.location.href = redirectUrl;
+    }
+
+    // Run the redirect handler when the page loads
+    window.onload = handleRedirect;
+  </script>
+</head>
+<body>
+  <h1>Redirecting to AutoMech app...</h1>
+  <p>If you are not redirected automatically, please check that you have the AutoMech app installed.</p>
+</body>
+</html>
