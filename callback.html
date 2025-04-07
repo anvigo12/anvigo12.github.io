@@ -2,7 +2,20 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AutoMech Auth Redirect</title>
+  <!-- Add debug console -->
+  <div id="debug" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 20px; max-height: 200px; overflow-y: auto;"></div>
+  <script type="text/javascript">
+    // Debug function to help troubleshoot
+    function debug(message) {
+      console.log(message);
+      var debugDiv = document.getElementById('debug');
+      var p = document.createElement('p');
+      p.textContent = message;
+      debugDiv.appendChild(p);
+    }
+  </script>
   <script type="text/javascript">
     // Parse the URL parameters
     function getUrlParameter(name) {
@@ -14,28 +27,99 @@
 
     // Function to handle the redirect
     function handleRedirect() {
+      // Show debug panel
+      document.getElementById('debug').style.display = 'block';
+      debug('Redirect handler started');
+      
       // Get the parameters from Auth0
       var code = getUrlParameter('code');
       var state = getUrlParameter('state');
       var error = getUrlParameter('error');
       var error_description = getUrlParameter('error_description');
-
-      // Build the redirect URL for the Android app
-      var redirectUrl = 'https://anvigo12.github.io/callback';
       
-      // Append all the original parameters
+      debug('Parameters: code=' + (code ? 'present' : 'missing') + 
+            ', state=' + (state ? 'present' : 'missing') + 
+            ', error=' + (error || 'none'));
+      
+      // Build the parameter string
       var params = [];
       if (code) params.push('code=' + encodeURIComponent(code));
       if (state) params.push('state=' + encodeURIComponent(state));
       if (error) params.push('error=' + encodeURIComponent(error));
       if (error_description) params.push('error_description=' + encodeURIComponent(error_description));
       
-      if (params.length > 0) {
-        redirectUrl += '?' + params.join('&');
+      var paramString = params.join('&');
+      debug('Parameter string: ' + paramString);
+      
+      // Try different approaches to redirect to the app
+      
+      // Approach 1: Universal Links / App Links
+      var appLinkUrl = 'https://anvigo12.github.io/callback';
+      if (paramString) {
+        appLinkUrl += '?' + paramString;
       }
-
-      // Redirect to the Android app (this will be intercepted by the app)
-      window.location.href = redirectUrl;
+      debug('Trying App Link redirect: ' + appLinkUrl);
+      
+      // Approach 2: Intent URL (Android specific)
+      var intentUrl = 'intent://callback';
+      if (paramString) {
+        intentUrl += '?' + paramString;
+      }
+      intentUrl += '#Intent;scheme=https;package=com.example.automech;S.browser_fallback_url=' + 
+                  encodeURIComponent(appLinkUrl) + ';end';
+      debug('Intent URL prepared: ' + intentUrl);
+      
+      // Approach 3: Custom Scheme (if configured)
+      var customSchemeUrl = 'com.example.automech://callback';
+      if (paramString) {
+        customSchemeUrl += '?' + paramString;
+      }
+      debug('Custom scheme URL prepared: ' + customSchemeUrl);
+      
+      // Create buttons for different redirect methods
+      var actionsDiv = document.createElement('div');
+      actionsDiv.style.marginTop = '20px';
+      
+      var intentButton = document.createElement('button');
+      intentButton.textContent = 'Try Intent URL (Android)';
+      intentButton.onclick = function() {
+        debug('Launching intent URL...');
+        window.location.href = intentUrl;
+      };
+      actionsDiv.appendChild(intentButton);
+      
+      var appLinkButton = document.createElement('button');
+      appLinkButton.textContent = 'Try App Link';
+      appLinkButton.style.marginLeft = '10px';
+      appLinkButton.onclick = function() {
+        debug('Launching App Link...');
+        window.location.href = appLinkUrl;
+      };
+      actionsDiv.appendChild(appLinkButton);
+      
+      var customSchemeButton = document.createElement('button');
+      customSchemeButton.textContent = 'Try Custom Scheme';
+      customSchemeButton.style.marginLeft = '10px';
+      customSchemeButton.onclick = function() {
+        debug('Launching custom scheme...');
+        window.location.href = customSchemeUrl;
+      };
+      actionsDiv.appendChild(customSchemeButton);
+      
+      document.body.appendChild(actionsDiv);
+      
+      // Try automatic redirect after a short delay
+      debug('Will attempt automatic redirect in 1 second...');
+      setTimeout(function() {
+        debug('Trying intent URL first...');
+        window.location.href = intentUrl;
+        
+        // Try App Link as fallback after another delay
+        setTimeout(function() {
+          debug('Trying App Link as fallback...');
+          window.location.href = appLinkUrl;
+        }, 1500);
+      }, 1000);
     }
 
     // Run the redirect handler when the page loads
@@ -43,7 +127,9 @@
   </script>
 </head>
 <body>
-  <h1>Redirecting to AutoMech app...</h1>
-  <p>If you are not redirected automatically, please check that you have the AutoMech app installed.</p>
+  <h1>AutoMech Authentication</h1>
+  <p>Authentication successful! Redirecting to AutoMech app...</p>
+  <p id="redirect-status">If redirection doesn't happen automatically, use one of the buttons below.</p>
+  <p><small>Troubleshooting: If no redirection method works, please ensure the app is installed and properly configured.</small></p>
 </body>
 </html>
