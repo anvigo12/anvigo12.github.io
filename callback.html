@@ -106,6 +106,30 @@
       };
       actionsDiv.appendChild(customSchemeButton);
       
+      // Add debug info for troubleshooting
+      var debugInfoDiv = document.createElement('div');
+      debugInfoDiv.style.marginTop = '20px';
+      debugInfoDiv.style.padding = '10px';
+      debugInfoDiv.style.border = '1px solid #ccc';
+      debugInfoDiv.style.backgroundColor = '#f8f8f8';
+      debugInfoDiv.style.fontFamily = 'monospace';
+      debugInfoDiv.style.fontSize = '12px';
+      
+      var debugInfo = document.createElement('pre');
+      var rawParams = "Raw params: " + window.location.search;
+      var tokenParams = "Token Info:\n";
+      if(code) {
+        tokenParams += "- code: " + code.substring(0, 10) + "...\n";
+      }
+      if(state) {
+        tokenParams += "- state: " + state + "\n";
+      }
+      debugInfo.textContent = rawParams + "\n\n" + tokenParams;
+      debugInfoDiv.appendChild(debugInfo);
+      
+      actionsDiv.appendChild(document.createElement('hr'));
+      actionsDiv.appendChild(debugInfoDiv);
+      
       document.body.appendChild(actionsDiv);
       
       // Try automatic redirect after a short delay
