@@ -1,0 +1,9 @@
+[{
+  relation: [delegate_permission/common.handle_all_urls],
+  target: {
+    namespace: android_app,
+    package_name: com.example.automech,
+    sha256_cert_fingerprints:
+    [85:A8:1E:82:FD:C2:21:39:CE:9E:42:43:F9:B4:D7:12:E9:5B:E2:44:A1:49:CF:F6:63:AF:9D:A2:B2:95:E9:7F]
+  }
+}]
